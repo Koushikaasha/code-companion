@@ -109,6 +109,16 @@ ${code}
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              time: { type: 'STRING', description: 'Time complexity estimation, e.g. O(N)' },
+              space: { type: 'STRING', description: 'Space complexity estimation, e.g. O(1)' },
+              bottleneck: { type: 'STRING', description: 'One short sentence explaining the main performance issue.' },
+              optimized: { type: 'STRING', description: 'The fully optimized refactored C++ code.' }
+            },
+            required: ['time', 'space', 'bottleneck', 'optimized']
+          }
         }
       });
       aiText = response.text.trim();
