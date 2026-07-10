@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Companion — Production Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <style>
+        /* Custom scrollbar to keep it looking classy */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    </style>
+</head>
+<body class="bg-[#030712] text-slate-200 min-h-screen font-sans antialiased flex flex-col justify-between selection:bg-indigo-500/30">
+
+    <header class="border-b border-slate-900/80 px-8 py-4 bg-[#030712]/80 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></div>
+            <span class="text-xs uppercase tracking-[0.25em] font-semibold text-slate-400">Code Companion</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-[10px] uppercase font-mono tracking-widest text-slate-500 bg-slate-950 px-2.5 py-1 rounded border border-slate-900">Engine: Gemini 2.5 Flash</span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full flex-grow items-stretch">
+        
+        <section class="lg:col-span-7 flex flex-col gap-4 bg-[#090d16] border border-slate-900 p-6 rounded-2xl shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-900 pb-3">
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-medium">Source Workspace</span>
+                <span class="text-[11px] text-indigo-400 bg-indigo-950/30 border border-indigo-900/50 px-2 py-0.5 rounded font-mono">Language Agnostic</span>
+            </div>
+            
+            <div id="editorContainer" class="w-full h-[450px] rounded-xl overflow-hidden border border-slate-900 bg-[#1e1e1e]"></div>
+            
+            <button id="analyzeBtn" onclick="runAnalysis()" class="w-full bg-slate-100 text-slate-950 hover:bg-white font-medium text-sm py-3.5 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:shadow-white/5 active:scale-[0.99]">
+                <span>Execute Structural Analysis</span>
+            </button>
+        </section>
+
+        <section class="lg:col-span-5 flex flex-col gap-6 justify-between bg-[#090d16] border border-slate-900 p-6 rounded-2xl shadow-2xl">
+            <div class="w-full flex flex-col gap-6">
+                <div class="flex items-center justify-between border-b border-slate-900 pb-3">
+                    <span class="text-xs uppercase tracking-wider text-slate-400 font-medium">Telemetry Metrics</span>
+                    <span class="text-xs text-slate-600 font-mono" id="statusIndicator">Ready</span>
+                </div>
+                
+                <div id="loadingState" class="hidden text-center text-slate-400 py-16 animate-pulse border border-dashed border-slate-800 rounded-xl bg-[#030712]/50">
+                    <div class="text-sm font-mono tracking-widest text-indigo-400 mb-1">COMPILING...</div>
+                    <span class="text-xs text-slate-500">Mapping computational logic vectors</span>
+                </div>
+
+                <div id="resultsContent" class="flex flex-col gap-5 transition-all duration-300">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 transition-all hover:border-slate-800">
+                            <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Time Complexity</span>
+                            <span id="timeMetric" class="text-3xl font-light text-slate-100 font-mono">--</span>
+                        </div>
+                        <div class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 transition-all hover:border-slate-800">
+                            <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Space Complexity</span>
+                            <span id="spaceMetric" class="text-3xl font-light text-slate-100 font-mono">--</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 transition-all hover:border-slate-800">
+                        <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">Isolated Bottleneck</span>
+                        <p id="bottleneckText" class="text-slate-400 text-xs leading-relaxed font-mono">System idle. Awaiting compilation inputs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="optimizedWrapper" class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 flex flex-col gap-2 transition-all duration-300">
+                <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Refactored Matrix Output</span>
+                <pre class="p-3 text-xs font-mono text-indigo-400/90 overflow-x-auto h-40 max-h-40 selection:bg-slate-800"><code id="optimizedCode">// Refactored output will stream here...</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-900/50 px-8 py-3 text-center text-[10px] text-slate-600 font-mono">
+        &copy; 2026 Production Environment System Core.
+    </footer>
+
+    <script>
+        let editor;
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editorContainer'), {
+                value: '', // Starts completely clean as requested!
+                language: 'cpp',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 13,
+                fontFamily: 'Fira Code, Consolas, Monaco, monospace',
+                minimap: { enabled: false },
+                lineNumbers: "on",
+                lineDecorationsWidth: 10,
+                scrollbar: { verticalScrollbarSize: 4, horizontalScrollbarSize: 4 },
+                roundedSelection: true,
+                cursorBlinking: "smooth",
+                cursorSmoothCaretAnimation: "on",
+                scrollBeyondLastLine: false
+            });
+        });
+
+        async function runAnalysis() {
+            const codeText = editor.getValue();
+            if(!codeText.trim()) return alert("Workspace empty. Please inject code string.");
+
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('resultsContent').classList.add('opacity-10');
+            document.getElementById('optimizedWrapper').classList.add('opacity-10');
+            document.getElementById('statusIndicator').innerText = "Analyzing...";
+
+            try {
+                const apiHost = window.location.origin.startsWith('file:') || window.location.origin === 'null'
+                    ? 'http://localhost:5000'
+                    : window.location.origin;
+                const response = await fetch(`${apiHost}/api/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: codeText })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('timeMetric').innerText = data.time || "N/A";
+                document.getElementById('spaceMetric').innerText = data.space || "N/A";
+                document.getElementById('bottleneckText').innerText = data.bottleneck || "No architectural vulnerabilities found.";
+                document.getElementById('optimizedCode').innerText = data.optimized || "// Input code is fully optimized.";
+                document.getElementById('statusIndicator').innerText = "Success";
+
+            } catch (error) {
+                console.error("Transmission breakdown:", error);
+                alert("Runtime Error: Check if local backend port node environment is running.");
+                document.getElementById('statusIndicator').innerText = "Error";
+            } finally {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('resultsContent').classList.remove('opacity-10');
+                document.getElementById('optimizedWrapper').classList.remove('opacity-10');
+            }
+        }
+    </script>
+</body>
+</html>
