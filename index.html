@@ -127,6 +127,10 @@
 
                 const data = await response.json();
 
+                if (!response.ok) {
+                    throw new Error(data.details || data.error || "Server error");
+                }
+
                 document.getElementById('timeMetric').innerText = data.time || "N/A";
                 document.getElementById('spaceMetric').innerText = data.space || "N/A";
                 document.getElementById('bottleneckText').innerText = data.bottleneck || "No architectural vulnerabilities found.";
@@ -135,7 +139,7 @@
 
             } catch (error) {
                 console.error("Transmission breakdown:", error);
-                alert("Runtime Error: Check if local backend port node environment is running.");
+                alert(`Runtime Error: ${error.message}`);
                 document.getElementById('statusIndicator').innerText = "Error";
             } finally {
                 document.getElementById('loadingState').classList.add('hidden');
