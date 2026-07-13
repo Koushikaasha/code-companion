@@ -1,95 +1,489 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Companion — Production Analyzer</title>
+    <title>Code Companion — Premium AI Optimizer</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- Tailwind v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Monaco Editor Loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <!-- html2pdf.js for exporting PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
         /* Custom scrollbar to keep it looking classy */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #070a13;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+        }
     </style>
 </head>
-<body class="bg-[#030712] text-slate-200 min-h-screen font-sans antialiased flex flex-col justify-between selection:bg-indigo-500/30">
 
-    <header class="border-b border-slate-900/80 px-8 py-4 bg-[#030712]/80 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></div>
-            <span class="text-xs uppercase tracking-[0.25em] font-semibold text-slate-400">Code Companion</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-[10px] uppercase font-mono tracking-widest text-slate-500 bg-slate-950 px-2.5 py-1 rounded border border-slate-900">Engine: Gemini 2.5 Flash</span>
-        </div>
-    </header>
+<body
+    class="bg-[#030712] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500/30 overflow-x-hidden relative">
 
-    <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full flex-grow items-stretch">
-        
-        <section class="lg:col-span-7 flex flex-col gap-4 bg-[#090d16] border border-slate-900 p-6 rounded-2xl shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-900 pb-3">
-                <span class="text-xs uppercase tracking-wider text-slate-400 font-medium">Source Workspace</span>
-                <span class="text-[11px] text-indigo-400 bg-indigo-950/30 border border-indigo-900/50 px-2 py-0.5 rounded font-mono">Language Agnostic</span>
+    <!-- Background decorative gradients -->
+    <div
+        class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none">
+    </div>
+    <div
+        class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/10 blur-[120px] pointer-events-none">
+    </div>
+
+    <!-- ==================== AUTH VIEW ==================== -->
+    <div id="authView" class="hidden min-h-screen flex items-center justify-center p-6 z-10">
+        <div class="glass neon-glow w-full max-w-md p-8 rounded-3xl transition-all duration-300">
+            <div class="flex flex-col items-center mb-8">
+                <div
+                    class="h-10 w-10 rounded-2xl bg-indigo-600 flex items-center justify-center mb-3 shadow-lg shadow-indigo-600/30">
+                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-white" id="authTitle">Welcome to Code Companion</h1>
+                <p class="text-xs text-slate-400 mt-1" id="authSubtitle">Please sign in to access optimization telemetry
+                </p>
             </div>
-            
-            <div id="editorContainer" class="w-full h-[450px] rounded-xl overflow-hidden border border-slate-900 bg-[#1e1e1e]"></div>
-            
-            <button id="analyzeBtn" onclick="runAnalysis()" class="w-full bg-slate-100 text-slate-950 hover:bg-white font-medium text-sm py-3.5 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:shadow-white/5 active:scale-[0.99]">
-                <span>Execute Structural Analysis</span>
-            </button>
-        </section>
 
-        <section class="lg:col-span-5 flex flex-col gap-6 justify-between bg-[#090d16] border border-slate-900 p-6 rounded-2xl shadow-2xl">
-            <div class="w-full flex flex-col gap-6">
-                <div class="flex items-center justify-between border-b border-slate-900 pb-3">
-                    <span class="text-xs uppercase tracking-wider text-slate-400 font-medium">Telemetry Metrics</span>
-                    <span class="text-xs text-slate-600 font-mono" id="statusIndicator">Ready</span>
-                </div>
-                
-                <div id="loadingState" class="hidden text-center text-slate-400 py-16 animate-pulse border border-dashed border-slate-800 rounded-xl bg-[#030712]/50">
-                    <div class="text-sm font-mono tracking-widest text-indigo-400 mb-1">COMPILING...</div>
-                    <span class="text-xs text-slate-500">Mapping computational logic vectors</span>
+            <!-- Error message banner -->
+            <div id="authError"
+                class="hidden mb-4 p-3.5 bg-red-950/40 border border-red-900/50 rounded-xl text-xs text-red-300 flex items-start gap-2">
+                <svg class="h-4 w-4 shrink-0 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span id="authErrorText">Invalid credentials</span>
+            </div>
+
+            <form id="authForm" onsubmit="handleAuthSubmit(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label
+                            class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Username</label>
+                        <input type="text" id="usernameInput" required
+                            class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-slate-600"
+                            placeholder="enter username">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
+                        <input type="password" id="passwordInput" required
+                            class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-slate-600"
+                            placeholder="••••••••">
+                    </div>
                 </div>
 
-                <div id="resultsContent" class="flex flex-col gap-5 transition-all duration-300">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 transition-all hover:border-slate-800">
-                            <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Time Complexity</span>
-                            <span id="timeMetric" class="text-3xl font-light text-slate-100 font-mono">--</span>
+                <button type="submit"
+                    class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-3 rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-600/20 active:scale-[0.99]"
+                    id="authSubmitBtn">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-slate-400">
+                <span id="authToggleText">Don't have an account?</span>
+                <button onclick="toggleAuthMode()"
+                    class="text-indigo-400 hover:text-indigo-300 font-medium ml-1 underline cursor-pointer"
+                    id="authToggleBtn">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN WORKSPACE ==================== -->
+    <div id="mainWorkspace" class="hidden min-h-screen flex flex-col justify-between z-10">
+        <!-- Sticky Header -->
+        <header
+            class="border-b border-slate-900 bg-[#030712]/80 backdrop-blur-md sticky top-0 z-50 px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="h-8 w-8 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                    <svg class="h-4.5 w-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-sm font-bold tracking-tight text-white">Code Companion</span>
+                    <span class="text-[9px] uppercase tracking-widest text-slate-500 block">AI Optimization
+                        Engine</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-900">
+                <button onclick="switchTab('analyzer')" id="tabBtn-analyzer"
+                    class="px-4 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all duration-200 bg-indigo-600 text-white">
+                    Analyzer
+                </button>
+                <button onclick="switchTab('dashboard')" id="tabBtn-dashboard"
+                    class="px-4 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all duration-200 text-slate-400 hover:text-white">
+                    Dashboard
+                </button>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs text-slate-300 font-medium" id="userDisplay">User</span>
+                </div>
+                <button onclick="handleLogout()"
+                    class="text-xs text-slate-400 hover:text-rose-400 font-medium flex items-center gap-1.5 border border-slate-800 hover:border-rose-950 bg-slate-950 px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                        </path>
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Main Content Grid -->
+        <main class="max-w-7xl mx-auto px-6 py-6 w-full flex-grow flex flex-col justify-start">
+
+            <!-- VIEW 1: ANALYZER -->
+            <div id="analyzerView" class="w-full grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                <!-- Left Section: Editor & Input Controls -->
+                <section class="xl:col-span-6 flex flex-col gap-4 glass p-5 rounded-2xl">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Workspace</span>
+                            <span class="text-[10px] text-slate-500 font-mono">v1.2.0</span>
                         </div>
-                        <div class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 transition-all hover:border-slate-800">
-                            <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Space Complexity</span>
-                            <span id="spaceMetric" class="text-3xl font-light text-slate-100 font-mono">--</span>
+                        <div class="flex items-center gap-3">
+                            <!-- Language Dropdown -->
+                            <select id="langSelector" onchange="changeLanguage(this.value)"
+                                class="bg-slate-950 border border-slate-800 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-indigo-500 transition-all font-mono">
+                                <option value="cpp">C++ (.cpp)</option>
+                                <option value="java">Java (.java)</option>
+                                <option value="python">Python (.py)</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 transition-all hover:border-slate-800">
-                        <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">Isolated Bottleneck</span>
-                        <p id="bottleneckText" class="text-slate-400 text-xs leading-relaxed font-mono">System idle. Awaiting compilation inputs.</p>
+                    <!-- File Drag and Drop Zone -->
+                    <div id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                        ondrop="handleDrop(event)" onclick="triggerFileInput()"
+                        class="border border-dashed border-slate-800 hover:border-indigo-500/60 hover:bg-indigo-950/5 rounded-xl p-4 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-1 group">
+                        <svg class="h-6 w-6 text-slate-500 group-hover:text-indigo-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                            </path>
+                        </svg>
+                        <span class="text-xs text-slate-400 font-medium">Drag & drop files or <span
+                                class="text-indigo-400 hover:underline">browse</span></span>
+                        <span class="text-[10px] text-slate-500">Supports .cpp, .java, .py files</span>
+                        <input type="file" id="fileInput" onchange="handleFileSelect(event)" class="hidden"
+                            accept=".cpp,.cc,.java,.py">
+                    </div>
+
+                    <!-- Monaco Editor container -->
+                    <div class="relative rounded-xl overflow-hidden border border-slate-800 bg-[#1e1e1e]">
+                        <div id="editorContainer" class="w-full h-[400px]"></div>
+                    </div>
+
+                    <button id="analyzeBtn" onclick="runAnalysis()"
+                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-3.5 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.99]">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                            </path>
+                        </svg>
+                        <span>Analyze Performance</span>
+                    </button>
+                </section>
+
+                <!-- Right Section: Results & Diff Comparison -->
+                <section
+                    class="xl:col-span-6 flex flex-col gap-4 justify-between glass p-5 rounded-2xl relative overflow-hidden">
+                    <div class="w-full flex flex-col gap-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-violet-400">Optimization
+                                Telemetry</span>
+                            <span
+                                class="text-[10px] text-slate-500 font-mono bg-slate-950 px-2 py-0.5 rounded border border-slate-900"
+                                id="statusIndicator">Engine Idle</span>
+                        </div>
+
+                        <!-- Telemetry Grid -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div
+                                class="bg-slate-950/70 p-4 rounded-xl border border-slate-900 transition-all hover:border-slate-800">
+                                <span
+                                    class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Time
+                                    Complexity</span>
+                                <span id="timeMetric" class="text-2xl font-semibold text-slate-100 font-mono">--</span>
+                            </div>
+                            <div
+                                class="bg-slate-950/70 p-4 rounded-xl border border-slate-900 transition-all hover:border-slate-800">
+                                <span
+                                    class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1">Space
+                                    Complexity</span>
+                                <span id="spaceMetric" class="text-2xl font-semibold text-slate-100 font-mono">--</span>
+                            </div>
+                        </div>
+
+                        <!-- Isolated Bottleneck Analysis -->
+                        <div
+                            class="bg-slate-950/70 p-4 rounded-xl border border-slate-900 transition-all hover:border-slate-800">
+                            <span
+                                class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-1.5">Isolated
+                                Bottleneck</span>
+                            <p id="bottleneckText" class="text-slate-400 text-xs leading-relaxed font-mono">Awaiting
+                                code analysis input...</p>
+                        </div>
+
+                        <!-- Loader State overlay -->
+                        <div id="loadingState"
+                            class="hidden absolute inset-0 bg-[#030712]/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-center p-6">
+                            <div
+                                class="h-10 w-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4">
+                            </div>
+                            <div class="text-sm font-mono tracking-widest text-indigo-400 mb-1 animate-pulse">COMPILING
+                                LOGIC MATRIX</div>
+                            <span class="text-xs text-slate-500">Retrieving intelligence variables from Gemini 3.1
+                                Flash-Lite</span>
+                        </div>
+
+                        <!-- Monaco Diff Editor comparison container -->
+                        <div id="diffWrapper" class="flex flex-col gap-2 relative">
+                            <div class="flex items-center justify-between">
+                                <span
+                                    class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Side-by-Side
+                                    Optimization Diff</span>
+                                <span
+                                    class="text-[9px] text-slate-400 font-mono bg-indigo-950/30 text-indigo-300 px-2 py-0.5 rounded">Original
+                                    (L) vs Optimized (R)</span>
+                            </div>
+                            <div class="rounded-xl overflow-hidden border border-slate-800 bg-[#1e1e1e]">
+                                <div id="diffContainer" class="w-full h-[210px]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions Footer -->
+                    <div class="flex items-center gap-3 mt-4">
+                        <button id="pdfBtn" onclick="exportAnalysisPDF()" disabled
+                            class="flex-grow bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-slate-900 disabled:hover:border-slate-800 text-slate-300 font-medium text-xs py-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
+                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            Export Report (PDF)
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- VIEW 2: DASHBOARD / HISTORY -->
+            <div id="dashboardView" class="w-full hidden flex flex-col gap-6">
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass p-5 rounded-2xl flex items-center gap-4">
+                        <div
+                            class="h-10 w-10 bg-indigo-950/50 text-indigo-400 border border-indigo-900/50 rounded-xl flex items-center justify-center shrink-0">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-xs block font-semibold uppercase tracking-wider">Total
+                                Optimizations</span>
+                            <span id="stat-total" class="text-2xl font-bold text-white">0</span>
+                        </div>
+                    </div>
+                    <div class="glass p-5 rounded-2xl flex items-center gap-4">
+                        <div
+                            class="h-10 w-10 bg-violet-950/50 text-violet-400 border border-violet-900/50 rounded-xl flex items-center justify-center shrink-0">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-xs block font-semibold uppercase tracking-wider">Last
+                                Activity</span>
+                            <span id="stat-last" class="text-sm font-semibold text-white font-mono">No record</span>
+                        </div>
+                    </div>
+                    <div class="glass p-5 rounded-2xl flex items-center gap-4">
+                        <div
+                            class="h-10 w-10 bg-emerald-950/50 text-emerald-400 border border-emerald-900/50 rounded-xl flex items-center justify-center shrink-0">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-xs block font-semibold uppercase tracking-wider">Analysis
+                                Engine</span>
+                            <span class="text-sm font-semibold text-white font-mono">Gemini 3.1 Flash-Lite</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Grid Section -->
+                <div class="flex flex-col gap-4">
+                    <h2 class="text-lg font-bold tracking-tight text-white">Optimization Archives</h2>
+                    <div id="historyGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Cards will render dynamically here -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="historyEmpty"
+                        class="hidden text-center py-20 border border-dashed border-slate-800 rounded-2xl glass flex flex-col items-center justify-center gap-3">
+                        <svg class="h-10 w-10 text-slate-600 animate-bounce" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v2m16 4h-2a2 2 0 00-2 2v3a2 2 0 002 2h2a2 2 0 002-2v-3a2 2 0 00-2-2H6z">
+                            </path>
+                        </svg>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">No optimizations archived</h3>
+                            <p class="text-xs text-slate-500 mt-1">Upload code files and run telemetry analysis to log
+                                records</p>
+                        </div>
+                        <button onclick="switchTab('analyzer')"
+                            class="mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs px-4 py-2 rounded-xl transition-all cursor-pointer">
+                            Start First Analysis
+                        </button>
                     </div>
                 </div>
             </div>
+        </main>
 
-            <div id="optimizedWrapper" class="bg-[#030712] p-5 rounded-xl border border-slate-900/60 flex flex-col gap-2 transition-all duration-300">
-                <span class="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Refactored Matrix Output</span>
-                <pre class="p-3 text-xs font-mono text-indigo-400/90 overflow-x-auto h-40 max-h-40 selection:bg-slate-800"><code id="optimizedCode">// Refactored output will stream here...</code></pre>
+        <!-- Footer -->
+        <footer class="border-t border-slate-900/60 px-8 py-3 text-center text-[10px] text-slate-600 font-mono">
+            &copy; 2026 Code Companion Professional Engine Core. All rights reserved.
+        </footer>
+    </div>
+
+    <!-- ==================== PDF REPORT TEMPLATE (Hidden from UI, used by html2pdf) ==================== -->
+    <div id="pdfTemplate" class="hidden bg-white text-slate-900 p-8 max-w-4xl" style="font-family: Arial, sans-serif;">
+        <div
+            style="border-bottom: 2px solid #6366f1; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 style="color: #4f46e5; margin: 0; font-size: 24px;">Code Companion Analysis Report</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 11px;">Powered by Google Gemini 3.1 Flash-Lite</p>
             </div>
-        </section>
-    </main>
+            <div style="text-align: right;">
+                <p style="color: #475569; margin: 0; font-size: 11px; font-weight: bold;" id="pdfMetaDate">Date: July
+                    10, 2026</p>
+                <p style="color: #64748b; margin: 2px 0 0 0; font-size: 11px;" id="pdfMetaLanguage">Language: C++</p>
+            </div>
+        </div>
 
-    <footer class="border-t border-slate-900/50 px-8 py-3 text-center text-[10px] text-slate-600 font-mono">
-        &copy; 2026 Production Environment System Core.
-    </footer>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                <h3
+                    style="margin: 0 0 4px 0; font-size: 10px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">
+                    Time Complexity</h3>
+                <p id="pdfTimeMetric"
+                    style="margin: 0; font-size: 20px; font-weight: bold; color: #1e293b; font-family: monospace;">--
+                </p>
+            </div>
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                <h3
+                    style="margin: 0 0 4px 0; font-size: 10px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">
+                    Space Complexity</h3>
+                <p id="pdfSpaceMetric"
+                    style="margin: 0; font-size: 20px; font-weight: bold; color: #1e293b; font-family: monospace;">--
+                </p>
+            </div>
+        </div>
 
+        <div
+            style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+            <h3
+                style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">
+                Isolated Bottleneck Explanation</h3>
+            <p id="pdfBottleneckText"
+                style="margin: 0; font-size: 12px; color: #334155; line-height: 1.5; font-family: monospace;">Awaiting
+                analysis data...</p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h3
+                style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">
+                Original Source Code</h3>
+            <pre id="pdfOriginalCode"
+                style="margin: 0; background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; font-size: 10px; font-family: monospace; white-space: pre-wrap; word-break: break-all; color: #334155; max-height: 250px; overflow-y: auto;"></pre>
+        </div>
+
+        <div>
+            <h3
+                style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">
+                Optimized Code Output</h3>
+            <pre id="pdfOptimizedCode"
+                style="margin: 0; background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 6px; font-size: 10px; font-family: monospace; white-space: pre-wrap; word-break: break-all; color: #166534; max-height: 250px; overflow-y: auto;"></pre>
+        </div>
+
+        <div
+            style="border-top: 1px solid #e2e8f0; margin-top: 30px; padding-top: 8px; text-align: center; color: #94a3b8; font-size: 9px;">
+            This document is generated automatically by Code Companion. All rights reserved.
+        </div>
+    </div>
+
+    <!-- Application Script Logic -->
     <script>
-        let editor;
+        // Backend Host Configuration
+        const API_HOST = window.location.origin.startsWith('file:') || window.location.origin === 'null'
+            ? 'http://localhost:5000'
+            : window.location.origin;
 
+        // Application State
+        let editor = null;
+        let diffEditor = null;
+        let currentView = 'analyzer';
+        let isLoginMode = true; // Toggle between Login and Signup
+        let lastAnalysisResult = null; // Store output for PDF generation
+
+        // Initialize Monaco Editor and Diff Editor
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
-        require(['vs/editor/editor.main'], function() {
+        require(['vs/editor/editor.main'], function () {
+            // Main Input Editor
             editor = monaco.editor.create(document.getElementById('editorContainer'), {
-                value: '', // Starts completely clean as requested!
+                value: '',
                 language: 'cpp',
                 theme: 'vs-dark',
                 automaticLayout: true,
@@ -104,49 +498,465 @@
                 cursorSmoothCaretAnimation: "on",
                 scrollBeyondLastLine: false
             });
+
+            // Diff View Editor
+            diffEditor = monaco.editor.createDiffEditor(document.getElementById('diffContainer'), {
+                theme: 'vs-dark',
+                readOnly: true,
+                automaticLayout: true,
+                fontFamily: 'Fira Code, Consolas, Monaco, monospace',
+                fontSize: 12,
+                minimap: { enabled: false },
+                scrollbar: { verticalScrollbarSize: 4, horizontalScrollbarSize: 4 }
+            });
+
+            // Set initial blank models for Diff Editor
+            setDiffModels('', '', 'cpp');
         });
 
-        async function runAnalysis() {
-            const codeText = editor.getValue();
-            if(!codeText.trim()) return alert("Workspace empty. Please inject code string.");
+        // Helper to update the Diff Editor Models
+        function setDiffModels(originalCode, optimizedCode, language) {
+            if (!diffEditor) return;
+            const originalModel = monaco.editor.createModel(originalCode, language);
+            const modifiedModel = monaco.editor.createModel(optimizedCode, language);
+            diffEditor.setModel({
+                original: originalModel,
+                modified: modifiedModel
+            });
+        }
 
-            document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('resultsContent').classList.add('opacity-10');
-            document.getElementById('optimizedWrapper').classList.add('opacity-10');
-            document.getElementById('statusIndicator').innerText = "Analyzing...";
+        // Check auth status on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+
+            if (token && username) {
+                document.getElementById('userDisplay').innerText = username;
+                document.getElementById('mainWorkspace').classList.remove('hidden');
+                loadHistory();
+            } else {
+                showAuthScreen();
+            }
+        });
+
+        // UI View Switcher
+        function showAuthScreen() {
+            document.getElementById('mainWorkspace').classList.add('hidden');
+            document.getElementById('authView').classList.remove('hidden');
+            isLoginMode = true;
+            updateAuthFormUI();
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            updateAuthFormUI();
+        }
+
+        function updateAuthFormUI() {
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const toggleText = document.getElementById('authToggleText');
+            const toggleBtn = document.getElementById('authToggleBtn');
+
+            // Reset error banner
+            document.getElementById('authError').classList.add('hidden');
+
+            if (isLoginMode) {
+                title.innerText = "Welcome to Code Companion";
+                subtitle.innerText = "Please sign in to access optimization telemetry";
+                submitBtn.innerText = "Sign In";
+                toggleText.innerText = "Don't have an account?";
+                toggleBtn.innerText = "Sign Up";
+            } else {
+                title.innerText = "Create Your Account";
+                subtitle.innerText = "Sign up now for professional performance analytics";
+                submitBtn.innerText = "Register";
+                toggleText.innerText = "Already have an account?";
+                toggleBtn.innerText = "Sign In";
+            }
+        }
+
+        // Authentication Submission handler
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            const errorBanner = document.getElementById('authError');
+            const errorText = document.getElementById('authErrorText');
+
+            if (!username || !password) return;
+
+            const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
 
             try {
-                const apiHost = window.location.origin.startsWith('file:') || window.location.origin === 'null'
-                    ? 'http://localhost:5000'
-                    : window.location.origin;
-                const response = await fetch(`${apiHost}/api/analyze`, {
+                const response = await fetch(`${API_HOST}${endpoint}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: codeText })
+                    body: JSON.stringify({ username, password })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.details || data.error || "Server error");
+                    throw new Error(data.error || 'Authentication action failed.');
                 }
 
+                if (isLoginMode) {
+                    // Store Token & Login details
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username);
+                    document.getElementById('userDisplay').innerText = data.username;
+
+                    // Transition to main screen
+                    document.getElementById('authView').classList.add('hidden');
+                    document.getElementById('mainWorkspace').classList.remove('hidden');
+
+                    // Reset input fields
+                    document.getElementById('usernameInput').value = '';
+                    document.getElementById('passwordInput').value = '';
+
+                    loadHistory();
+                } else {
+                    // Registration successful, alert user and switch to login
+                    alert('Registration successful! Please log in with your credentials.');
+                    isLoginMode = true;
+                    updateAuthFormUI();
+                }
+            } catch (err) {
+                console.error("Auth Failure:", err);
+                errorText.innerText = err.message;
+                errorBanner.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('mainWorkspace').classList.add('hidden');
+        }
+
+        // Tab Navigation Controller
+        function switchTab(tabId) {
+            const tabs = ['analyzer', 'dashboard'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                if (t === tabId) {
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.remove('text-slate-400', 'hover:text-white');
+                } else {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('text-slate-400', 'hover:text-white');
+                }
+            });
+
+            if (tabId === 'analyzer') {
+                document.getElementById('analyzerView').classList.remove('hidden');
+                document.getElementById('dashboardView').classList.add('hidden');
+            } else {
+                document.getElementById('analyzerView').classList.add('hidden');
+                document.getElementById('dashboardView').classList.remove('hidden');
+                loadHistory(); // Fetch fresh data for dashboard
+            }
+        }
+
+        // Editor Language Controller
+        function changeLanguage(langVal) {
+            if (!editor) return;
+            const model = editor.getModel();
+
+            // Monaco language mappings
+            let monacoLang = langVal;
+            if (langVal === 'cpp') monacoLang = 'cpp';
+            if (langVal === 'java') monacoLang = 'java';
+            if (langVal === 'python') monacoLang = 'python';
+
+            monaco.editor.setModelLanguage(model, monacoLang);
+            document.getElementById('langSelector').value = langVal;
+        }
+
+        // File Uploader Interactions
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.add('border-indigo-500', 'bg-indigo-950/20');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('border-indigo-500', 'bg-indigo-950/20');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('border-indigo-500', 'bg-indigo-950/20');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processUploadedFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                processUploadedFile(files[0]);
+            }
+        }
+
+        function processUploadedFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            let lang = 'cpp';
+
+            if (ext === 'py') lang = 'python';
+            else if (ext === 'java') lang = 'java';
+            else if (ext === 'cpp' || ext === 'cc' || ext === 'h') lang = 'cpp';
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const text = e.target.result;
+                editor.setValue(text);
+                changeLanguage(lang);
+            };
+            reader.readAsText(file);
+        }
+
+        // Perform Optimization Analysis
+        async function runAnalysis() {
+            const codeText = editor.getValue();
+            const language = document.getElementById('langSelector').value;
+            const token = localStorage.getItem('token');
+
+            if (!codeText.trim()) return alert("Please inject or upload code text first.");
+            if (!token) return showAuthScreen();
+
+            // Set loading state
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('statusIndicator').innerText = "Analyzing...";
+
+            try {
+                const response = await fetch(`${API_HOST}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ code: codeText, language: language })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.details || data.error || "Analysis request failed.");
+                }
+
+                // Update UI results
                 document.getElementById('timeMetric').innerText = data.time || "N/A";
                 document.getElementById('spaceMetric').innerText = data.space || "N/A";
-                document.getElementById('bottleneckText').innerText = data.bottleneck || "No architectural vulnerabilities found.";
-                document.getElementById('optimizedCode').innerText = data.optimized || "// Input code is fully optimized.";
+                document.getElementById('bottleneckText').innerText = data.bottleneck || "No bottlenecks observed.";
+
+                // Show side-by-side Diff comparison
+                setDiffModels(codeText, data.optimized, language === 'python' ? 'python' : language);
+
                 document.getElementById('statusIndicator').innerText = "Success";
+                document.getElementById('pdfBtn').removeAttribute('disabled');
+
+                lastAnalysisResult = {
+                    code: codeText,
+                    language: language,
+                    timeComplexity: data.time || "N/A",
+                    spaceComplexity: data.space || "N/A",
+                    bottleneck: data.bottleneck || "No bottlenecks observed.",
+                    optimized: data.optimized
+                };
+
+                // Automatically archive this analysis to user history on backend
+                await saveToHistory(lastAnalysisResult);
 
             } catch (error) {
-                console.error("Transmission breakdown:", error);
-                alert(`Runtime Error: ${error.message}`);
+                console.error("Transmission broke:", error);
+                alert(`Error occurred: ${error.message}`);
                 document.getElementById('statusIndicator').innerText = "Error";
             } finally {
                 document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('resultsContent').classList.remove('opacity-10');
-                document.getElementById('optimizedWrapper').classList.remove('opacity-10');
             }
+        }
+
+        // Save analysis to history API
+        async function saveToHistory(payload) {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                await fetch(`${API_HOST}/api/history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.error("Failed storing analysis in history:", err);
+            }
+        }
+
+        // Fetch user history from backend
+        async function loadHistory() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_HOST}/api/history`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                // Update total stat
+                document.getElementById('stat-total').innerText = data.length;
+
+                if (data.length > 0) {
+                    const latestTime = new Date(data[0].timestamp).toLocaleString('en-US', {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+                    document.getElementById('stat-last').innerText = latestTime;
+
+                    document.getElementById('historyEmpty').classList.add('hidden');
+                    document.getElementById('historyGrid').classList.remove('hidden');
+
+                    renderHistoryCards(data);
+                } else {
+                    document.getElementById('stat-last').innerText = "No record";
+                    document.getElementById('historyEmpty').classList.remove('hidden');
+                    document.getElementById('historyGrid').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error("Error loading history logs:", err);
+            }
+        }
+
+        // Dynamic rendering of dashboard history grid
+        function renderHistoryCards(items) {
+            const grid = document.getElementById('historyGrid');
+            grid.innerHTML = '';
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "glass p-5 rounded-2xl hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between cursor-pointer group hover:scale-[1.01]";
+                card.onclick = () => loadHistoryItemToWorkspace(item);
+
+                const dateStr = new Date(item.timestamp).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric'
+                });
+
+                let langBadgeColor = "bg-indigo-950 text-indigo-400 border-indigo-900";
+                if (item.language === 'python') langBadgeColor = "bg-yellow-950/60 text-yellow-400 border-yellow-900/60";
+                if (item.language === 'java') langBadgeColor = "bg-red-950/60 text-red-400 border-red-900/60";
+
+                card.innerHTML = `
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider font-mono border px-2.5 py-0.5 rounded-lg ${langBadgeColor}">
+                                ${item.language === 'cpp' ? 'C++' : item.language}
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">${dateStr}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 my-1">
+                            <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-900">
+                                <span class="block text-[8px] text-slate-500 uppercase tracking-widest">Time</span>
+                                <span class="text-xs font-semibold text-slate-200 font-mono">${item.timeComplexity}</span>
+                            </div>
+                            <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-900">
+                                <span class="block text-[8px] text-slate-500 uppercase tracking-widest">Space</span>
+                                <span class="text-xs font-semibold text-slate-200 font-mono">${item.spaceComplexity}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="block text-[8px] text-slate-500 uppercase tracking-widest mb-0.5">Bottleneck</span>
+                            <p class="text-[10px] text-slate-400 font-mono line-clamp-2 leading-relaxed">${item.bottleneck}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-end border-t border-slate-900/80 mt-4 pt-3 text-[10px] text-indigo-400 group-hover:text-indigo-300 font-medium gap-1">
+                        Load in workspace
+                        <svg class="h-3 w-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Click handler for history logs
+        function loadHistoryItemToWorkspace(item) {
+            // Restore model states in Workspace
+            editor.setValue(item.code);
+            changeLanguage(item.language);
+
+            document.getElementById('timeMetric').innerText = item.timeComplexity;
+            document.getElementById('spaceMetric').innerText = item.spaceComplexity;
+            document.getElementById('bottleneckText').innerText = item.bottleneck;
+
+            setDiffModels(item.code, item.optimized, item.language === 'python' ? 'python' : item.language);
+
+            lastAnalysisResult = {
+                code: item.code,
+                language: item.language,
+                timeComplexity: item.timeComplexity,
+                spaceComplexity: item.spaceComplexity,
+                bottleneck: item.bottleneck,
+                optimized: item.optimized
+            };
+
+            document.getElementById('pdfBtn').removeAttribute('disabled');
+            document.getElementById('statusIndicator').innerText = "Success (Loaded)";
+
+            // Switch to Workspace
+            switchTab('analyzer');
+        }
+
+        // Export Report to PDF
+        function exportAnalysisPDF() {
+            if (!lastAnalysisResult) return alert("Nothing analyzed to export.");
+
+            const dateStr = new Date().toLocaleDateString('en-US', {
+                month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            // Populate PDF Template fields
+            document.getElementById('pdfMetaDate').innerText = `Date: ${dateStr}`;
+            document.getElementById('pdfMetaLanguage').innerText = `Language: ${lastAnalysisResult.language.toUpperCase()}`;
+            document.getElementById('pdfTimeMetric').innerText = lastAnalysisResult.timeComplexity;
+            document.getElementById('pdfSpaceMetric').innerText = lastAnalysisResult.spaceComplexity;
+            document.getElementById('pdfBottleneckText').innerText = lastAnalysisResult.bottleneck;
+            document.getElementById('pdfOriginalCode').innerText = lastAnalysisResult.code;
+            document.getElementById('pdfOptimizedCode').innerText = lastAnalysisResult.optimized;
+
+            // Trigger export process
+            const element = document.getElementById('pdfTemplate');
+            element.classList.remove('hidden'); // Temporarily display in document tree
+
+            const opt = {
+                margin: 15,
+                filename: `companion-analysis-${Date.now()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.add('hidden'); // Re-hide after print renders
+            }).catch(err => {
+                console.error("PDF engine crash:", err);
+                element.classList.add('hidden');
+            });
         }
     </script>
 </body>
+
 </html>
