@@ -38,34 +38,69 @@ if (!isOpenRouter && apiKey) {
 }
 
 // Database JSON file paths
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
-const HISTORY_FILE = path.join(__dirname, 'data', 'history.json');
+const DATA_DIR = path.join(__dirname, 'data');
+const TMP_DIR = '/tmp';
 
-// Ensure data directory and files exist
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-  fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
-}
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 
-// Helper functions to read/write JSON files
-function readData(filePath) {
+const TMP_USERS_FILE = path.join(TMP_DIR, 'users.json');
+const TMP_HISTORY_FILE = path.join(TMP_DIR, 'history.json');
+
+// In-memory persistence to retain state across requests in process lifetime
+let memoryUsers = null;
+let memoryHistory = null;
+
+// Helper functions to read/write JSON files with serverless fallback and memory cache
+function readData(filePath, tmpFilePath) {
+  if (filePath === USERS_FILE && memoryUsers !== null) {
+    return memoryUsers;
+  }
+  if (filePath === HISTORY_FILE && memoryHistory !== null) {
+    return memoryHistory;
+  }
+
+  let data = [];
   try {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify([]));
-      return [];
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf8');
+      data = JSON.parse(content || '[]');
+    } else if (tmpFilePath && fs.existsSync(tmpFilePath)) {
+      const content = fs.readFileSync(tmpFilePath, 'utf8');
+      data = JSON.parse(content || '[]');
     }
-    const content = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(content || '[]');
   } catch (e) {
     console.error(`Error reading ${filePath}:`, e);
-    return [];
+    data = [];
   }
+
+  if (filePath === USERS_FILE) memoryUsers = data;
+  if (filePath === HISTORY_FILE) memoryHistory = data;
+
+  return data;
 }
 
-function writeData(filePath, data) {
+function writeData(filePath, tmpFilePath, data) {
+  if (filePath === USERS_FILE) memoryUsers = data;
+  if (filePath === HISTORY_FILE) memoryHistory = data;
+
+  let written = false;
   try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    written = true;
   } catch (e) {
-    console.error(`Error writing ${filePath}:`, e);
+    console.warn(`Primary write to ${filePath} failed (serverless/read-only environment):`, e.message);
+  }
+
+  if (!written && tmpFilePath) {
+    try {
+      fs.writeFileSync(tmpFilePath, JSON.stringify(data, null, 2), 'utf8');
+    } catch (e) {
+      console.error(`Fallback write to ${tmpFilePath} failed:`, e.message);
+    }
   }
 }
 
@@ -109,12 +144,19 @@ app.get('/api/test-key', (req, res) => {
 
 // Authentication Routes
 app.post('/api/auth/register', async (req, res) => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: "Username and password are required." });
   }
 
-  const users = readData(USERS_FILE);
+  username = username.trim();
+  password = password.trim();
+
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username and password cannot be empty or blank spaces." });
+  }
+
+  const users = readData(USERS_FILE, TMP_USERS_FILE);
   if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
     return res.status(400).json({ error: "Username already exists." });
   }
@@ -127,8 +169,12 @@ app.post('/api/auth/register', async (req, res) => {
       password: hashedPassword
     };
     users.push(newUser);
-    writeData(USERS_FILE, users);
-    res.status(201).json({ message: "User registered successfully." });
+    writeData(USERS_FILE, TMP_USERS_FILE, users);
+
+    // Generate JWT token so user can be automatically logged in after registration
+    const token = jwt.sign({ id: newUser.id, username: newUser.username }, JWT_SECRET, { expiresIn: '24h' });
+
+    res.status(201).json({ message: "User registered successfully.", token, username: newUser.username });
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ error: "Registration failed." });
@@ -136,12 +182,15 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: "Username and password are required." });
   }
 
-  const users = readData(USERS_FILE);
+  username = username.trim();
+  password = password.trim();
+
+  const users = readData(USERS_FILE, TMP_USERS_FILE);
   const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
   if (!user) {
     return res.status(401).json({ error: "Invalid username or password." });
@@ -162,7 +211,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 // History Routes
 app.get('/api/history', authenticateToken, (req, res) => {
-  const history = readData(HISTORY_FILE);
+  const history = readData(HISTORY_FILE, TMP_HISTORY_FILE);
   const userHistory = history.filter(h => h.userId === req.user.id);
   userHistory.sort((a, b) => b.timestamp - a.timestamp);
   res.json(userHistory);
@@ -174,7 +223,7 @@ app.post('/api/history', authenticateToken, (req, res) => {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
-  const history = readData(HISTORY_FILE);
+  const history = readData(HISTORY_FILE, TMP_HISTORY_FILE);
   const historyItem = {
     id: Date.now().toString(),
     userId: req.user.id,
@@ -188,7 +237,7 @@ app.post('/api/history', authenticateToken, (req, res) => {
   };
 
   history.push(historyItem);
-  writeData(HISTORY_FILE, history);
+  writeData(HISTORY_FILE, TMP_HISTORY_FILE, history);
   res.status(201).json(historyItem);
 });
 

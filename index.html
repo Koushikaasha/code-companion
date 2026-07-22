@@ -602,8 +602,8 @@
                     throw new Error(data.error || 'Authentication action failed.');
                 }
 
-                if (isLoginMode) {
-                    // Store Token & Login details
+                if (data.token) {
+                    // Store Token & Login details (for Login or Auto-login after Registration)
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('username', data.username);
                     document.getElementById('userDisplay').innerText = data.username;
@@ -618,10 +618,11 @@
 
                     loadHistory();
                 } else {
-                    // Registration successful, alert user and switch to login
+                    // Fallback if server registered without returning a token directly
                     alert('Registration successful! Please log in with your credentials.');
                     isLoginMode = true;
                     updateAuthFormUI();
+                    document.getElementById('passwordInput').value = '';
                 }
             } catch (err) {
                 console.error("Auth Failure:", err);
