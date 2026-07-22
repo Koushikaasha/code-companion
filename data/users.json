@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1783696460554",
+    "username": "tester",
+    "password": "$2b$10$G6NgAOv1qtToEIYa7Mi.cexSgd1yoX3Dd3xDSJvTEsK8AsDQ9KnHS"
+  },
+  {
+    "id": "1783696519230",
+    "username": "testertestertester",
+    "password": "$2b$10$UiRo4Nk/Dawu19Kt867H0O6ze.Uig2a8Z4RxsWlJz/qgR7he/Axy."
+  },
+  {
+    "id": "1783699624151",
+    "username": "tester_final",
+    "password": "$2b$10$P3.DkBe90AnInTfuy/BLi.lgzfk2iYHk.I2uubGmThBlizvqLZJ9S"
+  },
+  {
+    "id": "1783700190034",
+    "username": "koushik",
+    "password": "$2b$10$62Nr3BAjhi9bbd8PeyFVQOJXiSnfmPRwkdOU3vqTWLA9zDrp1y1Mm"
+  },
+  {
+    "id": "1783759292212",
+    "username": "testuser",
+    "password": "$2b$10$ZHXr5noBrjROyRSsfB/Aru53X.GD4crJNFlICdWx/aYF02tEgLwky"
+  },
+  {
+    "id": "1783956474431",
+    "username": "testuser_agent",
+    "password": "$2b$10$fpAe.efYA5vnSdFyDekUV..LO6VcMyrFJioeNfWOPcaKQfPrh7Pnm"
+  },
+  {
+    "id": "1783958175730",
+    "username": "testuser_1783958175595",
+    "password": "$2b$10$yLiqRx.DGEQaBGsDKg0OZODQZHHySGFWMVtsRLVoUPpBsNYOCtMP6"
+  },
+  {
+    "id": "1783958327774",
+    "username": "testuser_1783958327634",
+    "password": "$2b$10$J4YbT3T7vjjoyzFyI6Ztq.AZOrragNh7aY72dpfhS.Y3orEMR5mh."
+  },
+  {
+    "id": "1783958588943",
+    "username": "koushik1",
+    "password": "$2b$10$RFz1fy0ovnzZaKQDjRvBG.mQwde8rb.Tdbm0KZ39UBElmkxAyNcwy"
+  }
+]

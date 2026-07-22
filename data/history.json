@@ -1,0 +1,145 @@
+[
+  {
+    "id": "1783958329518",
+    "userId": "1783958327774",
+    "code": "\n  #include <vector>\n  using namespace std;\n  int sum(vector<int>& arr) {\n    int s = 0;\n    for (int i = 0; i < arr.size(); i++) {\n      s += arr[i];\n    }\n    return s;\n  }\n  ",
+    "language": "cpp",
+    "timeComplexity": "O(N)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The use of an index-based loop prevents potential compiler auto-vectorization and involves redundant bounds checking in some configurations.",
+    "optimized": "#include <vector>#include <numeric>int sum(const std::vector<int>& arr) { return std::accumulate(arr.begin(), arr.end(), 0); }",
+    "timestamp": 1783958329518
+  },
+  {
+    "id": "1783958451226",
+    "userId": "1783956474431",
+    "code": "int sum(int a, int b) { return a + b; }",
+    "language": "cpp",
+    "timeComplexity": "O(1)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "None, the function is already optimal as a primitive operation.",
+    "optimized": "inline int sum(int a, int b) { return a + b; }",
+    "timestamp": 1783958451226
+  },
+  {
+    "id": "1783958454388",
+    "userId": "1783956474431",
+    "code": "int sum(int a, int b) { return a + b; }",
+    "language": "cpp",
+    "timeComplexity": "O(1)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The function is already optimal as it performs a single constant-time CPU instruction.",
+    "optimized": "inline int sum(int a, int b) noexcept { return a + b; }",
+    "timestamp": 1783958454388
+  },
+  {
+    "id": "1783958454900",
+    "userId": "1783956474431",
+    "code": "int sum(int a, int b) { return a + b; }",
+    "language": "cpp",
+    "timeComplexity": "O(1)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The function is already optimal and performant as it performs a single constant-time CPU addition.",
+    "optimized": "inline int sum(int a, int b) noexcept { return a + b; }",
+    "timestamp": 1783958454900
+  },
+  {
+    "id": "1783958454934",
+    "userId": "1783956474431",
+    "code": "int sum(int a, int b) { return a + b; }",
+    "language": "cpp",
+    "timeComplexity": "O(1)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "There is no performance bottleneck as the function performs a single primitive addition operation.",
+    "optimized": "inline int sum(int a, int b) { return a + b; }",
+    "timestamp": 1783958454934
+  },
+  {
+    "id": "1783958479486",
+    "userId": "1783956474431",
+    "code": "print(hello)",
+    "language": "python",
+    "timeComplexity": "O(1)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The code attempts to access an undefined variable 'hello' which raises a NameError.",
+    "optimized": "print(\"hello\")",
+    "timestamp": 1783958479486
+  },
+  {
+    "id": "1783958481806",
+    "userId": "1783956474431",
+    "code": "print(hello)",
+    "language": "python",
+    "timeComplexity": "O(1)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The code refers to a non-existent variable 'hello' which causes a NameError.",
+    "optimized": "print('hello')",
+    "timestamp": 1783958481806
+  },
+  {
+    "id": "1783958532471",
+    "userId": "1783956474431",
+    "code": "for(int i=0;i<n;i++)\r\n{\r\n    for(int j =i;j<n;j++)\r\n    {\r\n        cout<<i<<j ;\r\n           }\r\n}",
+    "language": "cpp",
+    "timeComplexity": "O(N^2)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The nested loop structure results in quadratic O(N^2) complexity and excessive I/O overhead.",
+    "optimized": "#include <iostream> void printPairs(int n) { std::ios_base::sync_with_stdio(false); std::cin.tie(NULL); for(int i = 0; i < n; ++i) { for(int j = i; j < n; ++j) { std::cout << i << j; } } }",
+    "timestamp": 1783958532471
+  },
+  {
+    "id": "1783958547181",
+    "userId": "1783956474431",
+    "code": "#include <iostream> void printPairs(int n) { std::ios_base::sync_with_stdio(false); std::cin.tie(NULL); for(int i = 0; i < n; ++i) { for(int j = i; j < n; ++j) { std::cout << i << j; } } }",
+    "language": "cpp",
+    "timeComplexity": "O(N^2)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The nested loops result in a quadratic time complexity of O(N^2) operations.",
+    "optimized": "#include <iostream> void printPairs(int n) { std::ios_base::sync_with_stdio(false); std::cin.tie(NULL); for(int i = 0; i < n; ++i) { for(int j = i; j < n; ++j) { std::cout << i << j; } } }",
+    "timestamp": 1783958547181
+  },
+  {
+    "id": "1783958614121",
+    "userId": "1783958588943",
+    "code": "class Solution {\r\npublic:\r\n    vector<int> sequentialDigits(int low, int high) {\r\n        vector<int> ans;\r\n\r\n        string s = \"123456789\";\r\n        string l = to_string(low);\r\n        string h = to_string(high);\r\n\r\n        for(int i = l.size(); i <= h.size(); i++) {\r\n            for(int j = 0; j <= 9 - i; j++) {\r\n                string n = s.substr(j, i);\r\n                int num = stoi(n);\r\n                if(num >= low && num <= high)\r\n                    ans.push_back(num);\r\n            }\r\n        }\r\n\r\n        return ans;\r\n    }\r\n};",
+    "language": "cpp",
+    "timeComplexity": "O(1)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The number of sequential digits is mathematically bounded and small, making string operations and conversions unnecessary overhead.",
+    "optimized": "class Solution { public: vector<int> sequentialDigits(int low, int high) { vector<int> ans; for (int len = 1; len <= 9; ++len) { for (int start = 1; start <= 9 - len + 1; ++start) { int num = 0; for (int i = 0; i < len; ++i) { num = num * 10 + (start + i); } if (num >= low && num <= high) ans.push_back(num); } } return ans; } };",
+    "timestamp": 1783958614121
+  },
+  {
+    "id": "1783958665041",
+    "userId": "1783958588943",
+    "code": "class Solution {\r\npublic:\r\n    vector<int> twoSum(vector<int>& nums, int target) {\r\n        unordered_map<int, int> mp;\r\n\r\n        for(int i=0;i< nums.size();i++)\r\n        {\r\n            int req = target - nums[i];\r\n            if(mp.find( req)!= mp.end())\r\n            {\r\n                return { mp[req], i};\r\n            }\r\n\r\n            mp[nums[i]]=i;\r\n        }\r\n       return {};\r\n    }\r\n};",
+    "language": "cpp",
+    "timeComplexity": "O(N)",
+    "spaceComplexity": "O(N)",
+    "bottleneck": "The use of unordered_map incurs significant overhead due to hash collisions and dynamic memory allocation.",
+    "optimized": "class Solution { public: vector<int> twoSum(vector<int>& nums, int target) { int n = nums.size(); if (n < 2) return {}; vector<pair<int, int>> indexed_nums(n); for (int i = 0; i < n; ++i) indexed_nums[i] = {nums[i], i}; std::sort(indexed_nums.begin(), indexed_nums.end()); int left = 0, right = n - 1; while (left < right) { int sum = indexed_nums[left].first + indexed_nums[right].first; if (sum == target) return {indexed_nums[left].second, indexed_nums[right].second}; else if (sum < target) left++; else right--; } return {}; } };",
+    "timestamp": 1783958665041
+  },
+  {
+    "id": "1783958719917",
+    "userId": "1783958588943",
+    "code": "class Solution {\r\npublic:\r\n    vector<vector<int>> threeSum(vector<int>& nums)\r\n     {\r\n        vector<vector<int>> res;\r\n        sort( nums.begin(), nums.end());\r\n        int n = nums.size();\r\n        for(int i=0;i<n-2;i++)\r\n        {\r\n           if (nums[i] + nums[i + 1] + nums[i + 2] > 0) break; \r\n           if (nums[i] + nums[n - 2] + nums[n - 1] < 0) continue;\r\n\r\n            if( i>0 && nums[i]==nums[i-1]) continue;\r\n            int j=i+1;\r\n            int k= n-1;\r\n            while( j<k)\r\n            {\r\n                int tot=nums[i]+ nums[j]+nums[k];\r\n                if( tot==0)\r\n                {\r\n                    res.push_back({nums[i], nums[j], nums[k]});\r\n                    j++;\r\n                    k--;\r\n                    while( nums[j]==nums[j-1] &&  j<k) j++;\r\n                    while( nums[k]==nums[k+1] && j<k) k--;\r\n                }\r\n                else if( tot> 0) k--;\r\n                else j++;\r\n\r\n            }\r\n        }\r\n        \r\n        return res;\r\n    }\r\n};",
+    "language": "cpp",
+    "timeComplexity": "O(N^2)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The O(N^2) time complexity is constrained by the sorted array traversal and two-pointer approach, which is optimal for the 3Sum problem.",
+    "optimized": "class Solution { public: vector<vector<int>> threeSum(vector<int>& nums) { vector<vector<int>> res; int n = nums.size(); if (n < 3) return res; sort(nums.begin(), nums.end()); for (int i = 0; i < n - 2; ++i) { if (nums[i] > 0) break; if (i > 0 && nums[i] == nums[i - 1]) continue; int j = i + 1, k = n - 1; while (j < k) { int sum = nums[i] + nums[j] + nums[k]; if (sum == 0) { res.push_back({nums[i], nums[j], nums[k]}); while (j < k && nums[j] == nums[j + 1]) j++; while (j < k && nums[k] == nums[k - 1]) k--; j++; k--; } else if (sum < 0) { j++; } else { k--; } } } return res; } };",
+    "timestamp": 1783958719917
+  },
+  {
+    "id": "1783958822886",
+    "userId": "1783958588943",
+    "code": "class Solution {\r\npublic:\r\n    int first_oc( vector<int> & nums, int n ,int target)\r\n    {\r\n        int low = 0;\r\n        int high =n-1;\r\n        int ans =-1;\r\n        while( low<=high)\r\n        {\r\n            int mid= low+ ( high-low)/2;\r\n            if( nums[mid]==target)\r\n            {\r\n                ans = mid;\r\n                high =mid-1;\r\n            }\r\n            else if( target> nums[mid]) low= mid+1;\r\n            else high = mid-1;\r\n        }\r\n       return ans;\r\n\r\n    }\r\n    int last_oc( vector<int>&nums, int n , int target)\r\n    {\r\n        int low = 0;\r\n        int high = n-1;\r\n        int ans =-1;\r\n        while( low<=high)\r\n        {\r\n            int mid= low+ ( high-low)/2;\r\n            if( nums[mid]==target)\r\n            {\r\n                ans = mid;\r\n                low = mid+1;\r\n            }\r\n            else if( target> nums[mid]) low= mid+1;\r\n            else high = mid-1;\r\n        }\r\n       return ans;\r\n    }\r\n    vector<int> searchRange(vector<int>& nums, int target) {\r\n        int n = nums.size();\r\n        int fo= first_oc(nums,n,target);\r\n        int lo= last_oc(nums,n,target);\r\n        return {fo,lo};\r\n        \r\n        \r\n    }\r\n};",
+    "language": "cpp",
+    "timeComplexity": "O(log N)",
+    "spaceComplexity": "O(1)",
+    "bottleneck": "The provided code is already optimal for searching a range in a sorted array using binary search.",
+    "optimized": "class Solution { public: vector<int> searchRange(vector<int>& nums, int target) { auto low = std::lower_bound(nums.begin(), nums.end(), target); if (low == nums.end() || *low != target) return {-1, -1}; auto high = std::upper_bound(low, nums.end(), target); return {static_cast<int>(std::distance(nums.begin(), low)), static_cast<int>(std::distance(nums.begin(), high) - 1)}; } };",
+    "timestamp": 1783958822886
+  }
+]
