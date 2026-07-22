@@ -1,6 +1,6 @@
 # 🚀 Code Companion
 
-**Code Companion** is an AI-powered full-stack web application that analyzes source code and provides explanations, time and space complexity estimation, optimization suggestions, and refactored code using the Google Gemini API.
+**Code Companion** is an AI-powered full-stack web application that analyzes source code and provides explanations, time and space complexity estimation, optimization suggestions, and refactored code using the Google Gemini API. Users sign in to a personal workspace and can revisit past analyses from a dedicated dashboard.
 
 ## 🌐 Live Demo
 
@@ -10,20 +10,25 @@
 
 ## ✨ Features
 
-* 💻 Interactive Monaco Editor
-* 🤖 AI-powered code analysis
-* ⚡ Time & Space complexity estimation
+* 🔐 User authentication (Sign In / Sign Up) with private, per-user workspaces
+* 💻 Interactive Monaco Editor with drag-and-drop file uploads
+* 🤖 AI-powered code analysis (Gemini 3.1 Flash-Lite)
+* ⚡ Time & Space complexity estimation (Big O)
+* 🎯 Isolated bottleneck detection
 * 🔄 Code optimization and refactoring
-* 🌍 Multi-language support
+* 🆚 Side-by-side diff view (original vs. optimized code)
+* 📊 Optimization Dashboard — track total optimizations, last activity, and reload past analyses
+* 📄 Export analysis reports as PDF
+* 🌍 Multi-language support (C++, Java, Python)
 * 🎨 Modern responsive UI
 
 ---
 
 ## 🛠 Tech Stack
 
-| Frontend                              | Backend             | AI                | Deployment     |
-| ------------------------------------- | ------------------- | ----------------- | -------------- |
-| React.js, Tailwind CSS, Monaco Editor | Node.js, Express.js | Google Gemini API | Vercel, Render |
+| Frontend                              | Backend             | Auth                     | AI                                  | Deployment     |
+| -------------------------------------- | -------------------- | ------------------------- | ------------------------------------ | -------------- |
+| React.js, Tailwind CSS, Monaco Editor  | Node.js, Express.js  | Session/token-based auth  | Google Gemini API (3.1 Flash-Lite)   | Vercel, Render |
 
 ---
 
@@ -57,14 +62,15 @@ Create a `.env` file:
 ```env
 GEMINI_API_KEY=your_api_key
 PORT=5000
+JWT_SECRET=your_jwt_secret
 ```
-
-##
 
 ---
 
 ## 👨‍💻 Author
 
-**A Koushiksai**
+A Koushiksai
+Tatikonda Sravya
+Miryala Varshini
 
-GitHub: https://github.com/Koushikaasha
+GitHub: https://github.com/Koushikaasha, https://github.com/tatikondasravyareddy, https://github.com/varshinimiriyala28-lab
