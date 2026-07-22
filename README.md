@@ -16,7 +16,7 @@
 
 * 🔐 **User Authentication:** Sign In / Sign Up with session-based JWT authentication and private per-user workspaces.
 * 💻 **Interactive Monaco Editor:** Native IDE experience with drag-and-drop file support across C++, Java, and Python.
-* 🤖 **AI-powered Code Analysis:** Powered by Google Gemini API (Gemini 3.1 Flash-Lite) for deep code insights.
+* 🤖 **AI-powered Code Analysis:** Powered by Google Gemini API (Gemini 2.0 / 1.5 Flash) for deep code insights.
 * ⚡ **Complexity Estimation:** Automatic Big-O Time & Space complexity calculation.
 * 🎯 **Isolated Bottleneck Detection:** Highlights performance bottlenecks in submitted code.
 * 🔄 **Side-by-Side Optimization Diff:** Visual comparison of original vs refactored/optimized code.
@@ -41,7 +41,7 @@
 
 | Frontend                              | Backend             | Auth                     | AI                                  | Deployment     |
 | -------------------------------------- | -------------------- | ------------------------- | ------------------------------------ | -------------- |
-| HTML, Tailwind CSS, Monaco Editor  | Node.js, Express.js  | Session/token-based auth  | Google Gemini API (3.1 Flash-Lite)   | Vercel, Render |
+| HTML, Tailwind CSS, Monaco Editor  | Node.js, Express.js  | Session/token-based auth  | Google Gemini API                   | Vercel, Render |
 
 ---
 
@@ -76,4 +76,3 @@ JWT_SECRET=your_jwt_secret
 * **A Koushiksai** (Roll No: 23881A04C7) - [GitHub](https://github.com/Koushikaasha)
 * **Tatikonda Sravya** (Roll No: 23881A04C1) - [GitHub](https://github.com/tatikondasravyareddy)
 * **Miryala Varshini** (Roll No: 23881A04C5) - [GitHub](https://github.com/varshinimiriyala28-lab)
-
