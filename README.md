@@ -67,7 +67,7 @@ JWT_SECRET=your_jwt_secret
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
 
 A Koushiksai
 Tatikonda Sravya
