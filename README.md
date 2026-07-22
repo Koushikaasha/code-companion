@@ -69,8 +69,8 @@ JWT_SECRET=your_jwt_secret
 
 ## 👨‍💻 Authors
 
-A Koushiksai
-Tatikonda Sravya
+A Koushiksai,
+Tatikonda Sravya,
 Miryala Varshini
 
 GitHub: https://github.com/Koushikaasha, https://github.com/tatikondasravyareddy, https://github.com/varshinimiriyala28-lab
