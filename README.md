@@ -4,7 +4,7 @@
 
 ## 🌐 Live Demo
 
-**Website:** https://code-companion-z5lj.vercel.app/
+**Website:** https://code-companion-ecru.vercel.app/
 
 ---
 
