@@ -41,7 +41,7 @@
 
 | Frontend                              | Backend             | Auth                     | AI                                  | Deployment     |
 | -------------------------------------- | -------------------- | ------------------------- | ------------------------------------ | -------------- |
-| React.js, Tailwind CSS, Monaco Editor  | Node.js, Express.js  | Session/token-based auth  | Google Gemini API (3.1 Flash-Lite)   | Vercel, Render |
+| HTML, Tailwind CSS, Monaco Editor  | Node.js, Express.js  | Session/token-based auth  | Google Gemini API (3.1 Flash-Lite)   | Vercel, Render |
 
 ---
 
