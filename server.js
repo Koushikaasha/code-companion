@@ -330,7 +330,7 @@ ${code}
       if (!ai) {
         throw new Error("Gemini AI client not initialized. Check GEMINI_API_KEY.");
       }
-      const candidateModels = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+      const candidateModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash'];
       let response;
       let lastErr;
       for (const modelName of candidateModels) {
