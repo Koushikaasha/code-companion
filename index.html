@@ -106,6 +106,13 @@
                             class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-slate-600"
                             placeholder="••••••••">
                     </div>
+                    <div id="confirmPasswordGroup" class="hidden">
+                        <label
+                            class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Confirm Password</label>
+                        <input type="password" id="confirmPasswordInput"
+                            class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-slate-600"
+                            placeholder="••••••••">
+                    </div>
                 </div>
 
                 <button type="submit"
@@ -117,7 +124,7 @@
 
             <div class="mt-6 text-center text-xs text-slate-400">
                 <span id="authToggleText">Don't have an account?</span>
-                <button onclick="toggleAuthMode()"
+                <button type="button" onclick="toggleAuthMode()"
                     class="text-indigo-400 hover:text-indigo-300 font-medium ml-1 underline cursor-pointer"
                     id="authToggleBtn">Sign Up</button>
             </div>
@@ -558,6 +565,7 @@
             const submitBtn = document.getElementById('authSubmitBtn');
             const toggleText = document.getElementById('authToggleText');
             const toggleBtn = document.getElementById('authToggleBtn');
+            const confirmGroup = document.getElementById('confirmPasswordGroup');
 
             // Reset error banner
             document.getElementById('authError').classList.add('hidden');
@@ -568,12 +576,14 @@
                 submitBtn.innerText = "Sign In";
                 toggleText.innerText = "Don't have an account?";
                 toggleBtn.innerText = "Sign Up";
+                if (confirmGroup) confirmGroup.classList.add('hidden');
             } else {
                 title.innerText = "Create Your Account";
                 subtitle.innerText = "Sign up now for professional performance analytics";
                 submitBtn.innerText = "Register";
                 toggleText.innerText = "Already have an account?";
                 toggleBtn.innerText = "Sign In";
+                if (confirmGroup) confirmGroup.classList.remove('hidden');
             }
         }
 
@@ -582,10 +592,35 @@
             e.preventDefault();
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
+            const confirmPassword = document.getElementById('confirmPasswordInput') ? document.getElementById('confirmPasswordInput').value.trim() : '';
             const errorBanner = document.getElementById('authError');
             const errorText = document.getElementById('authErrorText');
 
-            if (!username || !password) return;
+            errorBanner.classList.add('hidden');
+
+            if (!username || !password) {
+                errorText.innerText = 'Username and password are required.';
+                errorBanner.classList.remove('hidden');
+                return;
+            }
+
+            if (username.length < 3) {
+                errorText.innerText = 'Username must be at least 3 characters long.';
+                errorBanner.classList.remove('hidden');
+                return;
+            }
+
+            if (password.length < 4) {
+                errorText.innerText = 'Password must be at least 4 characters long.';
+                errorBanner.classList.remove('hidden');
+                return;
+            }
+
+            if (!isLoginMode && password !== confirmPassword) {
+                errorText.innerText = 'Passwords do not match.';
+                errorBanner.classList.remove('hidden');
+                return;
+            }
 
             const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
 
@@ -612,9 +647,17 @@
                     document.getElementById('authView').classList.add('hidden');
                     document.getElementById('mainWorkspace').classList.remove('hidden');
 
+                    setTimeout(() => {
+                        if (editor) editor.layout();
+                        if (diffEditor) diffEditor.layout();
+                    }, 50);
+
                     // Reset input fields
                     document.getElementById('usernameInput').value = '';
                     document.getElementById('passwordInput').value = '';
+                    if (document.getElementById('confirmPasswordInput')) {
+                        document.getElementById('confirmPasswordInput').value = '';
+                    }
 
                     loadHistory();
                 } else {
@@ -623,6 +666,9 @@
                     isLoginMode = true;
                     updateAuthFormUI();
                     document.getElementById('passwordInput').value = '';
+                    if (document.getElementById('confirmPasswordInput')) {
+                        document.getElementById('confirmPasswordInput').value = '';
+                    }
                 }
             } catch (err) {
                 console.error("Auth Failure:", err);
@@ -655,6 +701,10 @@
             if (tabId === 'analyzer') {
                 document.getElementById('analyzerView').classList.remove('hidden');
                 document.getElementById('dashboardView').classList.add('hidden');
+                setTimeout(() => {
+                    if (editor) editor.layout();
+                    if (diffEditor) diffEditor.layout();
+                }, 50);
             } else {
                 document.getElementById('analyzerView').classList.add('hidden');
                 document.getElementById('dashboardView').classList.remove('hidden');

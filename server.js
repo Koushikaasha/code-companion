@@ -62,13 +62,24 @@ function readData(filePath, tmpFilePath) {
 
   let data = [];
   try {
+    let baseData = [];
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath, 'utf8');
-      data = JSON.parse(content || '[]');
-    } else if (tmpFilePath && fs.existsSync(tmpFilePath)) {
-      const content = fs.readFileSync(tmpFilePath, 'utf8');
-      data = JSON.parse(content || '[]');
+      baseData = JSON.parse(content || '[]');
     }
+
+    let tmpData = [];
+    if (tmpFilePath && fs.existsSync(tmpFilePath)) {
+      const content = fs.readFileSync(tmpFilePath, 'utf8');
+      tmpData = JSON.parse(content || '[]');
+    }
+
+    // Merge base data with tmp data by ID (tmp entries take precedence)
+    const map = new Map();
+    baseData.forEach(item => { if (item && item.id) map.set(item.id, item); });
+    tmpData.forEach(item => { if (item && item.id) map.set(item.id, item); });
+
+    data = Array.from(map.values());
   } catch (e) {
     console.error(`Error reading ${filePath}:`, e);
     data = [];
@@ -84,18 +95,16 @@ function writeData(filePath, tmpFilePath, data) {
   if (filePath === USERS_FILE) memoryUsers = data;
   if (filePath === HISTORY_FILE) memoryHistory = data;
 
-  let written = false;
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-    written = true;
   } catch (e) {
     console.warn(`Primary write to ${filePath} failed (serverless/read-only environment):`, e.message);
   }
 
-  if (!written && tmpFilePath) {
+  if (tmpFilePath) {
     try {
       fs.writeFileSync(tmpFilePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (e) {
@@ -144,16 +153,19 @@ app.get('/api/test-key', (req, res) => {
 
 // Authentication Routes
 app.post('/api/auth/register', async (req, res) => {
-  let { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password are required." });
+  let { username, password } = req.body || {};
+  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: "Username and password are required text strings." });
   }
 
   username = username.trim();
   password = password.trim();
 
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password cannot be empty or blank spaces." });
+  if (username.length < 3) {
+    return res.status(400).json({ error: "Username must be at least 3 characters long." });
+  }
+  if (password.length < 4) {
+    return res.status(400).json({ error: "Password must be at least 4 characters long." });
   }
 
   const users = readData(USERS_FILE, TMP_USERS_FILE);
@@ -182,9 +194,9 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  let { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password are required." });
+  let { username, password } = req.body || {};
+  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: "Username and password are required text strings." });
   }
 
   username = username.trim();
@@ -318,23 +330,38 @@ ${code}
       if (!ai) {
         throw new Error("Gemini AI client not initialized. Check GEMINI_API_KEY.");
       }
-      const response = await generateContentWithRetry(ai, {
-        model: 'gemini-3.1-flash-lite',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'OBJECT',
-            properties: {
-              time: { type: 'STRING', description: 'Time complexity estimation, e.g. O(N)' },
-              space: { type: 'STRING', description: 'Space complexity estimation, e.g. O(1)' },
-              bottleneck: { type: 'STRING', description: 'One short sentence explaining the main performance issue.' },
-              optimized: { type: 'STRING', description: `The fully optimized refactored ${lang} code.` }
-            },
-            required: ['time', 'space', 'bottleneck', 'optimized']
-          }
+      const candidateModels = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+      let response;
+      let lastErr;
+      for (const modelName of candidateModels) {
+        try {
+          console.log(`Trying model: ${modelName}`);
+          response = await generateContentWithRetry(ai, {
+            model: modelName,
+            contents: prompt,
+            config: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: 'OBJECT',
+                properties: {
+                  time: { type: 'STRING', description: 'Time complexity estimation, e.g. O(N)' },
+                  space: { type: 'STRING', description: 'Space complexity estimation, e.g. O(1)' },
+                  bottleneck: { type: 'STRING', description: 'One short sentence explaining the main performance issue.' },
+                  optimized: { type: 'STRING', description: `The fully optimized refactored ${lang} code.` }
+                },
+                required: ['time', 'space', 'bottleneck', 'optimized']
+              }
+            }
+          });
+          if (response && response.text) break;
+        } catch (mErr) {
+          console.warn(`Model ${modelName} failed: ${mErr.message}`);
+          lastErr = mErr;
         }
-      });
+      }
+      if (!response || !response.text) {
+        throw lastErr || new Error("Failed to generate content with available Gemini models.");
+      }
       aiText = response.text.trim();
     }
 
@@ -387,8 +414,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-const PORT = process.env.PORT || 5000;
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`✅ Backend running on port ${PORT}`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`✅ Backend running on port ${PORT}`);
-});
+module.exports = app;
