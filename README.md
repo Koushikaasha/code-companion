@@ -71,8 +71,3 @@ JWT_SECRET=your_jwt_secret
 
 ---
 
-## 👨‍💻 Student Details & Credits
-
-* **A Koushiksai** (Roll No: 23881A04C7) - [GitHub](https://github.com/Koushikaasha)
-* **Tatikonda Sravya** (Roll No: 23881A04C1) - [GitHub](https://github.com/tatikondasravyareddy)
-* **Miryala Varshini** (Roll No: 23881A04C5) - [GitHub](https://github.com/varshinimiriyala28-lab)
